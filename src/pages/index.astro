@@ -1,0 +1,67 @@
+---
+import Layout   from '../layouts/Layout.astro';
+import Hero     from '../components/Hero.astro';
+import Skills   from '../components/Skills.astro';
+import Projects from '../components/Projects.astro';
+---
+
+<Layout
+  title="François Noah | Full-Stack Engineer"
+  description="Full-Stack Engineer specialized in Django, geospatial systems, real-time architectures, and React Native mobile engineering."
+>
+  <Hero />
+  <hr class="rule max-w-5xl mx-auto" />
+  <Skills />
+  <hr class="rule max-w-5xl mx-auto" />
+  <Projects />
+
+  <!-- ── Contact section ─────────────────────────────── -->
+  <section id="contact" class="py-28">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="relative bg-[#0D1120] border border-[#161D30] hover:border-[rgba(16,185,129,0.22)] transition-colors duration-300 rounded-md px-8 sm:px-14 py-14 text-center overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+
+        <!-- Background glow -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div class="w-80 h-80 rounded-full bg-[#10B981]/[0.04] blur-3xl"></div>
+        </div>
+
+        <p class="label mb-5">// 04 — Contact</p>
+
+        <h2 class="relative font-sans font-semibold text-[1.6rem] sm:text-[2rem] text-[#E6EBF4] tracking-[-0.025em] mb-4">
+          Let's build something precise.
+        </h2>
+
+        <p class="relative font-sans text-[#5A6A88] text-sm font-light max-w-[44ch] mx-auto mb-10 leading-relaxed">
+          Available for senior backend, full-stack, and technical lead roles.
+          Also open to GIS-intensive freelance engagements.
+        </p>
+
+        <div class="relative flex flex-wrap justify-center gap-3">
+          <a
+            href="mailto:francois@example.com"
+            class="inline-flex items-center gap-2 bg-[#10B981] hover:bg-[#34D399] text-[#04060E] font-mono font-medium text-[0.7rem] tracking-[0.12em] uppercase px-6 py-2.5 rounded-sm transition-all duration-200"
+          >
+            francois@example.com
+          </a>
+          <a
+            href="https://linkedin.com"
+            target="_blank"
+            rel="noopener"
+            class="inline-flex items-center gap-2 border border-[#1C2640] hover:border-[rgba(16,185,129,0.3)] text-[#5A6A88] hover:text-[#C4CEDF] font-mono text-[0.7rem] tracking-[0.12em] uppercase px-6 py-2.5 rounded-sm transition-all duration-200"
+          >
+            LinkedIn
+          </a>
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noopener"
+            class="inline-flex items-center gap-2 border border-[#1C2640] hover:border-[rgba(16,185,129,0.3)] text-[#5A6A88] hover:text-[#C4CEDF] font-mono text-[0.7rem] tracking-[0.12em] uppercase px-6 py-2.5 rounded-sm transition-all duration-200"
+          >
+            GitHub
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</Layout>

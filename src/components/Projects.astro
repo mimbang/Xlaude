@@ -1,0 +1,244 @@
+---
+// Projects.astro
+
+const projects = [
+  {
+    index:   '01',
+    status:  'Engineering Case Study',
+    title:   'Urban Mobility Simulation Platform',
+    tagline: 'GIS · Geospatial Analysis · Predictive Modeling',
+    tags:    ['GeoDjango', 'PostGIS', 'K-Means', 'Shapely', 'Django Channels', 'Celery', 'React Native', 'Docker'],
+
+    context:
+      'City planning teams across West Africa lacked tooling to model vehicle distribution, predict demand hotspots, and simulate depot placement decisions at metropolitan scale. Decisions were made on static spreadsheets with no spatial reasoning.',
+
+    challenge:
+      'The core engineering challenge was fusing heterogeneous geospatial data sources (OSM road networks, GPS telemetry, census polygons) into a unified query layer capable of running real-time spatial clustering without full table scans on datasets exceeding 500 K points.',
+
+    architecture:
+      'Django + GeoDjango backend with a PostGIS-powered spatial API. GPS telemetry is ingested via a Celery pipeline that batches writes and runs ST_ClusterKMeans clustering server-side. Demand zones are materialized as PostGIS polygon layers (convex hulls + concave polygons via ST_ConcaveHull). A WebSocket channel broadcasts cluster diffs to connected React Native dashboards.',
+
+    decisions: [
+      { decision: 'PostGIS over application-layer clustering', rationale: 'Push spatial computation to the database engine — eliminates Python serialization overhead and leverages GIST indexes for sub-50ms polygon intersection queries.' },
+      { decision: 'Materialized views for zone snapshots', rationale: 'Cluster outputs are expensive. Materializing every N minutes and serving stale-but-fast reads for dashboards cut API response time from 1.8 s to 38 ms.' },
+      { decision: 'Delta-only WebSocket payloads', rationale: 'Broadcasting full cluster state on each update at 500 K points is prohibitive. Structural diffs (add/remove/move zone) reduce WS payload size by ~97%.' },
+    ],
+
+    scalability:
+      'Architecture supports horizontal Celery worker scaling. PostGIS spatial indexes maintain query performance at 10× current data volume. Redis pub/sub fan-out decouples ingestion throughput from connected client count.',
+
+    metrics: [
+      { label: 'Spatial query p95', value: '< 45ms'  },
+      { label: 'Points ingested',   value: '500 K+'  },
+      { label: 'WS payload delta',  value: '−97%'    },
+    ],
+    link: '#',
+  },
+
+  {
+    index:   '02',
+    status:  'Engineering Case Study',
+    title:   'Real-Time Delivery Application',
+    tagline: 'WebSockets · Live Tracking · Background Tasks',
+    tags:    ['Django Channels', 'WebSockets', 'Redis', 'Celery', 'PostGIS', 'Expo', 'React Native'],
+
+    context:
+      'A last-mile logistics operator had zero real-time visibility into driver positions. Dispatchers relied on phone calls to track deliveries. The existing polling solution imposed a 20–35 s position lag and accounted for 60% of peak database load.',
+
+    challenge:
+      'Replace a polling architecture without downtime while maintaining compatibility with existing REST consumers. The synchronization model needed to handle intermittent mobile connectivity gracefully — GPS traces must never be lost, and the UI must reconcile out-of-order updates arriving from reconnected drivers.',
+
+    architecture:
+      'Django Channels layer with Redis as the channel layer backend. Driver apps (Expo/React Native) maintain a persistent WebSocket connection and publish GPS frames at 2 s intervals. The server validates, persists (async write via Celery), and fans out position deltas only to the authorized dispatcher room. ETA recalculation runs as a Celery periodic task reading the latest driver positions from a Redis hash (O(1) lookups). PostGIS stores full trip traces for analytics.',
+
+    decisions: [
+      { decision: 'Redis hash for live positions', rationale: 'A single HSET per driver update gives O(1) write and read. Querying current positions for 500 concurrent drivers takes ~0.3 ms, versus 80 ms with a DB round trip.' },
+      { decision: 'Celery for trace persistence', rationale: 'Decoupling WS handler from DB writes reduces handler latency from ~25 ms to ~1 ms and prevents DB pressure from cascading into WebSocket drops under load.' },
+      { decision: 'Sequence numbers for reconciliation', rationale: 'Each GPS frame carries a monotonic seq. The React Native client buffers frames and reorders before applying to the map, eliminating visual jitter from out-of-order delivery.' },
+    ],
+
+    scalability:
+      'Redis pub/sub fan-out means adding dispatchers does not increase driver-side write cost. Celery workers scale independently of the ASGI process pool. PostGIS partitioning by date keeps trace history queries fast as data grows.',
+
+    metrics: [
+      { label: 'Position lag',         value: '< 2 s'   },
+      { label: 'Concurrent drivers',   value: '500+'    },
+      { label: 'DB query reduction',   value: '−93%'    },
+    ],
+    link: '#',
+  },
+
+  {
+    index:   '03',
+    status:  'Engineering Case Study',
+    title:   'Inventory Management SaaS',
+    tagline: 'Scalable Backend · Invoicing Logic · System Architecture',
+    tags:    ['Django', 'DRF', 'Multi-tenant', 'Celery Beat', 'PostgreSQL', 'Soft-deletes', 'React Native'],
+
+    context:
+      'SME retail operators across 3 countries managed stock across multiple branches using disconnected spreadsheets. Overselling, phantom inventory, and 3-day manual reconciliation cycles were standard. No audit trail existed for financial compliance.',
+
+    challenge:
+      'Design a multi-tenant data model where branch isolation, soft-delete semantics, and double-entry ledger logic must coexist without cross-tenant data leakage, while keeping query complexity manageable for a small engineering team to maintain.',
+
+    architecture:
+      'Row-level multi-tenancy via a TenantMiddleware that injects a tenant FK into every queryset through a custom Manager. Stock movements use a double-entry ledger pattern: every adjustment produces two StockEntry rows (debit + credit), making the audit log immutable. Soft-deletes are implemented via an is_deleted + deleted_at field with a custom QuerySet.delete() override and a SafeDeleteManager. Invoices are generated server-side via a Celery task (WeasyPrint + Jinja2) and queued for delivery via Celery Beat. React Native lets branch managers scan barcodes for real-time stock adjustments.',
+
+    decisions: [
+      { decision: 'Double-entry ledger over mutable stock fields', rationale: 'A mutable quantity field cannot be audited — any UPDATE destroys history. An append-only ledger makes every state recoverable and enables point-in-time inventory snapshots via SUM aggregation.' },
+      { decision: 'Soft-deletes via SafeDeleteManager', rationale: 'Hard deletes break FK integrity and destroy audit context. Overriding delete() at the Manager level means all ORM operations are safe by default without per-view defensive checks.' },
+      { decision: 'Celery Beat for invoice scheduling', rationale: 'Synchronous invoice generation blocks the request thread for 800 ms–1.5 s under load. Async generation + polling endpoint eliminates this bottleneck and enables retry logic on PDF failures.' },
+    ],
+
+    scalability:
+      'Tenant-scoped queries leverage PostgreSQL partial indexes on (tenant_id, is_deleted). Ledger aggregation queries use materialized monthly snapshots as a base — full recalculation only runs from the last snapshot date. New tenants are provisioned in < 200 ms via a signal-driven setup flow.',
+
+    metrics: [
+      { label: 'Invoice generation', value: '< 1.2 s'      },
+      { label: 'Tenant isolation',   value: 'Row-level'    },
+      { label: 'Audit coverage',     value: '100% events'  },
+    ],
+    link: '#',
+  },
+];
+---
+
+<section id="projects" class="py-28">
+  <div class="max-w-5xl mx-auto px-6">
+
+    <!-- Section header -->
+    <div class="flex items-end justify-between pb-7 mb-12 border-b border-[#161D30]">
+      <div>
+        <p class="label mb-2.5">// 03 — Flagship Work</p>
+        <h2 class="font-sans font-semibold text-[1.65rem] text-[#E6EBF4] tracking-[-0.02em]">
+          Engineering Case Studies
+        </h2>
+      </div>
+      <span class="font-mono text-[0.62rem] text-[#3D4E6B] tracking-[0.08em] hidden sm:block">
+        {projects.length} projects
+      </span>
+    </div>
+
+    <!-- Projects -->
+    <div class="space-y-5">
+      {projects.map((project) => (
+        <article class="group bg-[#0D1120] border border-[#161D30] hover:border-[rgba(16,185,129,0.2)] rounded-md overflow-hidden transition-all duration-300 shadow-[0_2px_16px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.03)]">
+
+          <!-- ── Project title bar ───────────────────── -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-[#161D30]">
+            <div class="flex items-center gap-3 flex-wrap">
+              <span class="font-mono text-[0.6rem] text-[#10B981]/50 tracking-[0.18em]">[{project.index}]</span>
+              <h3 class="font-sans font-semibold text-[#E6EBF4] text-base tracking-[-0.015em]">
+                {project.title}
+              </h3>
+              <span class="font-mono text-[0.62rem] text-[#3D4E6B] hidden sm:inline">
+                — {project.tagline}
+              </span>
+            </div>
+            <a
+              href={project.link}
+              class="group/link shrink-0 inline-flex items-center gap-1.5 font-mono text-[0.62rem] text-[#3D4E6B] hover:text-[#10B981] tracking-[0.1em] uppercase transition-colors duration-150"
+            >
+              View
+              <svg class="w-3 h-3 group-hover/link:translate-x-0.5 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- ── Case study body ─────────────────────── -->
+          <div class="divide-y divide-[#161D30]">
+
+            <!-- Row 1: Context + Challenge side by side -->
+            <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#161D30]">
+              <div class="px-6 py-5">
+                <p class="label mb-3">Context</p>
+                <p class="font-sans text-[#5A6A88] text-[0.8rem] leading-[1.7] font-light">
+                  {project.context}
+                </p>
+              </div>
+              <div class="px-6 py-5">
+                <p class="label mb-3">Technical Challenge</p>
+                <p class="font-sans text-[#5A6A88] text-[0.8rem] leading-[1.7] font-light">
+                  {project.challenge}
+                </p>
+              </div>
+            </div>
+
+            <!-- Row 2: Architecture Overview (full width) -->
+            <div class="px-6 py-5">
+              <p class="label mb-3">Architecture Overview</p>
+              <p class="font-sans text-[#7888A8] text-[0.82rem] leading-[1.75] font-light">
+                {project.architecture}
+              </p>
+            </div>
+
+            <!-- Row 3: Engineering Decisions -->
+            <div class="px-6 py-5">
+              <p class="label mb-4">Engineering Decisions</p>
+              <div class="space-y-3.5">
+                {project.decisions.map((d, i) => (
+                  <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-x-5 gap-y-1 items-start">
+                    <!-- Decision label -->
+                    <div class="flex items-center gap-2 sm:pt-0.5">
+                      <span class="font-mono text-[0.58rem] text-[#10B981]/40">{String(i + 1).padStart(2,'0')}.</span>
+                      <span class="font-mono text-[0.68rem] text-[#10B981]/80 whitespace-nowrap">
+                        {d.decision}
+                      </span>
+                    </div>
+                    <!-- Rationale -->
+                    <p class="font-sans text-[#5A6A88] text-[0.78rem] leading-[1.65] font-light pl-4 sm:pl-0 border-l border-[#1C2640] sm:border-l-0 sm:border-l-0">
+                      {d.rationale}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <!-- Row 4: Scalability + Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] divide-y md:divide-y-0 md:divide-x divide-[#161D30]">
+              <div class="px-6 py-5">
+                <p class="label mb-3">Scalability</p>
+                <p class="font-sans text-[#5A6A88] text-[0.8rem] leading-[1.7] font-light">
+                  {project.scalability}
+                </p>
+              </div>
+              <!-- Metrics column -->
+              <div class="px-6 py-5 min-w-[160px]">
+                <p class="label mb-4">Key Metrics</p>
+                <ul class="space-y-4">
+                  {project.metrics.map((m) => (
+                    <li>
+                      <p class="font-mono text-[1.1rem] text-[#10B981] font-semibold leading-none tracking-[-0.02em]">
+                        {m.value}
+                      </p>
+                      <p class="font-mono text-[0.6rem] text-[#3D4E6B] mt-1 tracking-[0.06em]">
+                        {m.label}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <!-- Row 5: Tech tags -->
+            <div class="px-6 py-4 bg-[#0B0F19]/50 flex flex-wrap gap-1.5 items-center">
+              <span class="label mr-2">Stack</span>
+              {project.tags.map((tag) => (
+                <span class="font-mono text-[0.62rem] text-[#10B981]/65 border border-[#10B981]/12 bg-[#10B981]/[0.03] px-2.5 py-1 rounded-sm tracking-[0.06em] hover:border-[#10B981]/28 hover:text-[#10B981]/90 transition-colors duration-150">
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+          </div>
+
+          <!-- Bottom glow on hover -->
+          <div class="h-px bg-gradient-to-r from-transparent via-[rgba(16,185,129,0)] to-transparent group-hover:via-[rgba(16,185,129,0.3)] transition-all duration-700"></div>
+
+        </article>
+      ))}
+    </div>
+
+  </div>
+</section>

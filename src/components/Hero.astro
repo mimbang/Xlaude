@@ -1,0 +1,112 @@
+---
+// Hero.astro
+const badges = [
+  'Django',
+  'PostGIS',
+  'React Native',
+  'Redis',
+  'Celery',
+  'Docker',
+];
+---
+
+<section id="about" class="relative min-h-screen flex flex-col justify-center pt-11 overflow-hidden">
+
+  <!-- Coordinate labels -->
+  <span class="label absolute top-[4.5rem] left-6 hidden lg:block opacity-60">3.8667° N · 11.5167° E</span>
+  <span class="label absolute top-[4.5rem] right-6 hidden lg:block opacity-60">SYS · ONLINE · v2.0</span>
+
+  <!-- Thin vertical rule left -->
+  <div class="absolute left-6 top-40 bottom-0 w-px bg-gradient-to-b from-[#10B981]/20 via-[#161D30] to-transparent hidden xl:block"></div>
+
+  <div class="max-w-5xl mx-auto px-6 w-full py-20">
+
+    <!-- Availability indicator -->
+    <div class="enter flex items-center gap-2.5 mb-10">
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-50 duration-[2500ms]"></span>
+        <span class="relative inline-flex h-2 w-2 rounded-full bg-[#10B981]"></span>
+      </span>
+      <span class="font-mono text-[0.62rem] text-[#10B981] tracking-[0.16em] uppercase">
+        Open to Senior / Lead Engineering roles
+      </span>
+    </div>
+
+    <!-- Name -->
+    <div class="enter mb-3">
+      <h1 class="font-sans font-semibold text-[2.6rem] sm:text-[3.8rem] lg:text-[4.8rem] leading-[1.0] tracking-[-0.03em] text-[#E6EBF4]">
+        François Noah
+      </h1>
+    </div>
+
+    <!-- Title line -->
+    <div class="enter mb-8">
+      <div class="flex items-baseline flex-wrap gap-x-3">
+        <span class="font-sans font-light text-[2.1rem] sm:text-[3rem] lg:text-[3.8rem] leading-[1.0] tracking-[-0.025em] text-[#5A6A88]">
+          Full-Stack Engineer
+        </span>
+        <span class="caret inline-block w-[3px] h-[2.4rem] sm:h-[3rem] lg:h-[3.8rem] bg-[#10B981] rounded-sm self-end mb-1"></span>
+      </div>
+    </div>
+
+    <!-- Separator -->
+    <div class="enter mb-8">
+      <hr class="rule-em w-20" />
+    </div>
+
+    <!-- Bio -->
+    <p class="enter max-w-[52ch] text-[#7888A8] text-[0.97rem] leading-[1.75] font-light mb-12">
+      I design <span class="text-[#C4CEDF] font-normal">robust architectures</span> and
+      <span class="text-[#C4CEDF] font-normal">real-time systems</span>.
+      Specialized in the Django ecosystem,
+      <span class="text-[#C4CEDF] font-normal">geospatial technologies</span>,
+      and mobile engineering with
+      <span class="text-[#C4CEDF] font-normal">React Native</span>.
+    </p>
+
+    <!-- Tech badge row -->
+    <div class="enter flex flex-wrap gap-2 mb-14">
+      {badges.map((badge) => (
+        <span class="font-mono text-[0.68rem] text-[#10B981]/75 border border-[#10B981]/15 bg-[#10B981]/[0.04] px-3 py-1.5 rounded-sm tracking-[0.08em] hover:border-[#10B981]/35 hover:text-[#10B981] transition-colors duration-200">
+          {badge}
+        </span>
+      ))}
+    </div>
+
+    <!-- CTA row -->
+    <div class="enter flex flex-wrap items-center gap-4">
+      <a
+        href="#projects"
+        class="group inline-flex items-center gap-2.5 bg-[#10B981] hover:bg-[#34D399] text-[#04060E] font-mono font-medium text-[0.7rem] tracking-[0.12em] uppercase px-5 py-2.5 rounded-sm transition-all duration-200"
+      >
+        Engineering Work
+        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+        </svg>
+      </a>
+      <a
+        href="#contact"
+        class="inline-flex items-center gap-2 border border-[#1C2640] hover:border-[#10B981]/30 text-[#5A6A88] hover:text-[#C4CEDF] font-mono text-[0.7rem] tracking-[0.12em] uppercase px-5 py-2.5 rounded-sm transition-all duration-200"
+      >
+        Get in Touch
+      </a>
+      <a
+        href="/cv.pdf"
+        class="inline-flex items-center gap-2 text-[#3D4E6B] hover:text-[#7888A8] font-mono text-[0.7rem] tracking-[0.12em] uppercase py-2.5 transition-colors duration-200"
+      >
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+        </svg>
+        Resume
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Bottom scroll hint -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
+    <span class="label">scroll</span>
+    <div class="w-px h-8 bg-gradient-to-b from-[#10B981]/50 to-transparent"></div>
+  </div>
+
+</section>

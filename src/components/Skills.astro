@@ -1,0 +1,111 @@
+---
+// Skills.astro
+
+const pillars = [
+  {
+    index:   '01',
+    title:   'Backend & Data',
+    summary: 'Server-side architecture, ORM design, geospatial query engines, and high-throughput REST APIs.',
+    skills: [
+      { name: 'Django REST Framework', level: 95, note: 'Serializers · Viewsets · Auth' },
+      { name: 'PostgreSQL',            level: 88, note: 'Query plans · Indexing · CTEs' },
+      { name: 'PostGIS',               level: 85, note: 'Spatial SQL · GeoJSON · SRID' },
+      { name: 'GeoDjango',             level: 83, note: 'GIS · Proximity · Geom fields' },
+      { name: 'Celery',                level: 80, note: 'Workers · Beat · Chords/groups' },
+    ],
+  },
+  {
+    index:   '02',
+    title:   'Mobile Engineering',
+    summary: 'Cross-platform mobile apps, live state synchronization, and real-time push pipelines via WebSocket.',
+    skills: [
+      { name: 'React Native',              level: 88, note: 'Expo · EAS · Navigation' },
+      { name: 'Expo',                      level: 85, note: 'SDK · OTA · Modules' },
+      { name: 'WebSockets',                level: 82, note: 'Django Channels · WS/WSS' },
+      { name: 'Realtime Synchronization',  level: 78, note: 'Optimistic UI · Conflict resolution' },
+      { name: 'TypeScript',                level: 80, note: 'Strict mode · Generic types' },
+    ],
+  },
+  {
+    index:   '03',
+    title:   'Infrastructure',
+    summary: 'Containerized deployments, async task orchestration, caching layers, and production DevOps pipelines.',
+    skills: [
+      { name: 'Docker',              level: 90, note: 'Compose · Multi-stage builds' },
+      { name: 'Redis',               level: 85, note: 'Cache · Pub/Sub · Queues' },
+      { name: 'Linux',               level: 82, note: 'Ubuntu · Shell · Systemd' },
+      { name: 'CI/CD',               level: 78, note: 'GitHub Actions · Pipelines' },
+      { name: 'System Architecture', level: 80, note: 'Distributed · Event-driven' },
+    ],
+  },
+];
+---
+
+<section id="skills" class="py-28">
+  <div class="max-w-5xl mx-auto px-6">
+
+    <!-- Section header -->
+    <div class="flex items-end justify-between pb-7 mb-12 border-b border-[#161D30]">
+      <div>
+        <p class="label mb-2.5">// 02 — Technical Pillars</p>
+        <h2 class="font-sans font-semibold text-[1.65rem] text-[#E6EBF4] tracking-[-0.02em]">
+          Engineering Stack
+        </h2>
+      </div>
+      <span class="font-mono text-[0.62rem] text-[#3D4E6B] tracking-[0.08em] hidden sm:block">
+        {pillars.reduce((s, p) => s + p.skills.length, 0)} technologies
+      </span>
+    </div>
+
+    <!-- Pillar grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {pillars.map((pillar) => (
+        <article class="group relative bg-[#0D1120] border border-[#161D30] hover:border-[rgba(16,185,129,0.22)] rounded-md overflow-hidden transition-all duration-300 shadow-[0_2px_16px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.03)]">
+
+          <!-- Top accent bar -->
+          <div class="h-px w-full bg-gradient-to-r from-transparent via-[rgba(16,185,129,0)] to-transparent group-hover:via-[rgba(16,185,129,0.35)] transition-all duration-500"></div>
+
+          <!-- Header -->
+          <div class="px-5 pt-5 pb-4 border-b border-[#161D30]">
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-mono text-[0.6rem] text-[#3D4E6B] tracking-[0.16em] uppercase">[{pillar.index}]</span>
+              <!-- Tiny emerald dot -->
+              <span class="w-1.5 h-1.5 rounded-full bg-[#10B981]/30 group-hover:bg-[#10B981]/70 transition-colors duration-300"></span>
+            </div>
+            <h3 class="font-sans font-semibold text-[#C4CEDF] text-sm mb-2.5 tracking-[-0.01em]">
+              {pillar.title}
+            </h3>
+            <p class="font-sans text-[#5A6A88] text-[0.78rem] leading-[1.6] font-light">
+              {pillar.summary}
+            </p>
+          </div>
+
+          <!-- Skills list -->
+          <ul class="px-5 py-4 space-y-3.5">
+            {pillar.skills.map((skill) => (
+              <li class="group/skill">
+                <div class="flex items-baseline justify-between gap-2 mb-1.5">
+                  <span class="font-mono text-[0.68rem] text-[#10B981]/80 tracking-[0.04em] whitespace-nowrap">
+                    {skill.name}
+                  </span>
+                  <span class="font-mono text-[0.58rem] text-[#3D4E6B] text-right leading-tight hidden sm:block">
+                    {skill.note}
+                  </span>
+                </div>
+                <!-- Precision level bar -->
+                <div class="h-[2px] w-full bg-[#161D30] rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-gradient-to-r from-[#10B981]/60 to-[#10B981] rounded-full"
+                    style={`width: ${skill.level}%`}
+                  ></div>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+        </article>
+      ))}
+    </div>
+
+  </div>
+</section>
